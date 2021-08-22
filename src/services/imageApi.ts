@@ -15,13 +15,20 @@ export const imageApi = createApi({
       query: () => `chapters`,
     }),
     getChapterByUuid: builder.query({
-      query: (uuid) => `chapters/${uuid}`,
+      query: (uuid) => `chapters/${uuid}?onlyTags=Test`,
     }),
     getPages: builder.query({
       query: () => `pages`,
     }),
     getPageByUuid: builder.query({
       query: (uuid) => `pages/${uuid}`,
+    }),
+    patchPage: builder.mutation({
+      query: ({ uuid, ...patch }) => ({
+        url: `pages/${uuid}`,
+        method: 'PATCH',
+        body: patch,
+      }),
     }),
   }),
 });
@@ -35,4 +42,5 @@ export const {
   useGetChaptersQuery,
   useGetPageByUuidQuery,
   useGetPagesQuery,
+  usePatchPageMutation,
 } = imageApi;

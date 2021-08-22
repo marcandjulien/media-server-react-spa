@@ -1,11 +1,11 @@
 import IconButton from '@material-ui/core/IconButton';
 import ImageList from '@material-ui/core/ImageList';
-import ImageListItem from '@material-ui/core/ImageListItem';
 import ImageListItemBar from '@material-ui/core/ImageListItemBar';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import RadioButtonUncheckedIcon from '@material-ui/icons/RadioButtonUnchecked';
 import React from 'react';
+import ImageListItemWebtoon from './ImageListItemWebtoon';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -53,7 +53,7 @@ export default function PageImageList(props: any) {
     <div className={classes.root}>
       <ImageList rowHeight="auto" className={classes.imageList} cols={6}>
         {props?.pages?.map((page: any, index: number) => (
-          <ImageListItem key={page.uuid}>
+          <ImageListItemWebtoon key={page.uuid}>
             <img
               src={`http://localhost:3000/image/pages/${page.uuid}/download/${
                 page.number
@@ -62,7 +62,7 @@ export default function PageImageList(props: any) {
             />
             <ImageListItemBar
               title={page.number}
-              subtitle={<span>tags: {page.tags}</span>}
+              subtitle={<span>tags: {page?.tags?.map((t: any) => t.name).join(', ')}</span>}
               actionIcon={
                 <IconButton
                   aria-label="Select this page"
@@ -77,7 +77,7 @@ export default function PageImageList(props: any) {
                 </IconButton>
               }
             />
-          </ImageListItem>
+          </ImageListItemWebtoon>
         ))}
       </ImageList>
     </div>

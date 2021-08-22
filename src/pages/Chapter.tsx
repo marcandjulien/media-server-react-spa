@@ -1,11 +1,12 @@
 import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
 import { FC, ReactElement, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams } from 'react-router-dom';
 import PageImageList from '../components/PageImageList';
 // components
 import PageTitle from '../components/PageTitle';
-import { imageApi } from '../services/imageApi';
+import { imageApi, usePatchPageMutation } from '../services/imageApi';
 // constants
 import { APP_TITLE, PAGE_TITLE_CHAPTER } from '../utils/constants';
 
@@ -34,8 +35,10 @@ const Chapter: FC<{}> = (): ReactElement => {
 
   const { chapterUuid } = useParams<{ chapterUuid: string }>();
   const { data: chapter, error, isLoading } = imageApi.useGetChapterByUuidQuery(chapterUuid);
+  const [updatePage, { isLoading: isUpdating }] = usePatchPageMutation();
 
   const [selected, setSelected] = useState<string[]>([]);
+  const [tag, setTag] = useState<string>('');
 
   const handleSelection = (uuid: string) => {
     if (selected.includes(uuid)) {
@@ -44,6 +47,10 @@ const Chapter: FC<{}> = (): ReactElement => {
       setSelected([...selected, uuid]);
     }
   };
+
+  // const handleAddTag = async () => {
+  //   await Promise.all(selected.map((s) => updatePage({ uuid: s, tags: [tag] })));
+  // };
 
   return (
     <>
@@ -55,6 +62,17 @@ const Chapter: FC<{}> = (): ReactElement => {
       <div className={classes.root}>
         <PageTitle title={PAGE_TITLE_CHAPTER} />
         <Link to={`/reader?type=chapter&uuid=${chapterUuid}`}>Read Chapter</Link>
+        <div>
+          <TextField
+            id="standard-basic"
+            label="Tag"
+            value={tag}
+            onChange={(event) => setTag(event.target.value)}
+          />
+          {/* <Button variant="contained" onClick={handleAddTag}>
+            Add tag
+          </Button> */}
+        </div>
 
         <PageImageList pages={chapter?.pages} selected={selected} onSelection={handleSelection} />
         {/* <Grid container spacing={2} direction="row" justify="flex-start" alignItems="flex-start">
