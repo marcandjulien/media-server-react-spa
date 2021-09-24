@@ -1,4 +1,4 @@
-import { ImageList, ImageListItem, ImageListItemBar } from '@material-ui/core';
+import { Box, Button, ImageList, ImageListItem, ImageListItemBar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { FC, ReactElement } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -6,7 +6,7 @@ import { Link, useParams } from 'react-router-dom';
 import PageSectionTitle from '../components/PageSectionTitle';
 // components
 import PageTitle from '../components/PageTitle';
-import { useGetStoryByUuidQuery } from '../services/imageApi';
+import { useDeleteStoryByUuidMutation, useGetStoryByUuidQuery } from '../services/storiesApi';
 // constants
 import { APP_TITLE, PAGE_TITLE_STORIES } from '../utils/constants';
 
@@ -34,7 +34,9 @@ const Story: FC<{}> = (): ReactElement => {
   const classes = useStyles();
 
   const { storyUuid } = useParams<{ storyUuid: string }>();
-  const { data, error, isLoading } = useGetStoryByUuidQuery(storyUuid);
+  const { data: story } = useGetStoryByUuidQuery({ uuid: storyUuid });
+
+  const [deleteStory] = useDeleteStoryByUuidMutation();
 
   return (
     <>
@@ -44,17 +46,27 @@ const Story: FC<{}> = (): ReactElement => {
         </title>
       </Helmet>
       <div className={classes.root}>
-        <PageTitle title={PAGE_TITLE_STORIES} />
+        <Box>
+          <PageTitle title={PAGE_TITLE_STORIES} />
+          <Link to={`/story/${storyUuid}/newchapter`}>New chapter</Link>
+          <Button variant="contained" component="span" onClick={() => deleteStory(storyUuid)}>
+            Delete story
+          </Button>
+          <span>Find a way to update a chapter.</span>
+        </Box>
 
         <PageSectionTitle title="Chapters" />
         <ImageList cols={6} rowHeight={480}>
-          {data?.chapters?.map((chapter: any) => (
+          <ImageListItem key={story?.uuid}>
+            <Link to={`/storypages/${story?.uuid}`}>
+              <img src={story?.cover?.fileUrl} alt={story?.title} />
+              <ImageListItemBar title={story?.title} />
+            </Link>
+          </ImageListItem>
+          {story?.chapters?.map((chapter: any) => (
             <ImageListItem key={chapter.uuid}>
               <Link to={`/chapter/${chapter.uuid}`}>
-                <img
-                  src={`http://localhost:3000/image/pages/${chapter.pages?.[0].uuid}/download/${chapter.pages?.[0].number}.png`}
-                  alt={chapter.title}
-                />
+                <img src={chapter.cover?.fileUrl} alt={chapter.title} />
                 <ImageListItemBar title={chapter.title} />
               </Link>
             </ImageListItem>

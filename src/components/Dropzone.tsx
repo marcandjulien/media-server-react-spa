@@ -65,7 +65,7 @@ async function getFilePromise(fileEntry: FileEntry): Promise<File | undefined> {
 
 async function myCustomFileGetter(event: DropEvent) {
   console.log('event : ' + event.type);
-
+  console.time('myCustomFileGetter');
   let files: File[] = [];
   if (
     (event as DragEvent).dataTransfer &&
@@ -83,11 +83,14 @@ async function myCustomFileGetter(event: DropEvent) {
       }
     }
   }
+
+  console.timeEnd('myCustomFileGetter');
   return files;
 }
 
 export default function Dropzone(props: any) {
   const { onChange } = props;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     getFilesFromEvent: (event) => myCustomFileGetter(event),
     onDrop: (acceptedFiles) => {

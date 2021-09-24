@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 // components
 import PageTitle from '../components/PageTitle';
-import { useGetStoriesQuery } from '../services/imageApi';
+import { useGetStoriesQuery } from '../services/storiesApi';
 // constants
 import { APP_TITLE, PAGE_TITLE_STORIES } from '../utils/constants';
 
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 const Stories: FC<{}> = (): ReactElement => {
   const classes = useStyles();
 
-  const { data: stories, error, isLoading } = useGetStoriesQuery('');
+  const { data: stories } = useGetStoriesQuery({});
 
   return (
     <>
@@ -46,12 +46,9 @@ const Stories: FC<{}> = (): ReactElement => {
         <PageTitle title={PAGE_TITLE_STORIES} />
         <ImageList cols={6} rowHeight={480}>
           {stories?.map((story: any) => (
-            <ImageListItem key={story.img}>
+            <ImageListItem key={story.uuid}>
               <Link to={`/story/${story.uuid}`} className={classes.a}>
-                <img
-                  src={`http://localhost:3000/image/pages/${story.pages?.[0].uuid}/download/${story.pages?.[0].number}.png`}
-                  alt={story.title}
-                />
+                <img src={story.cover?.fileUrl} alt={story.title} />
                 <ImageListItemBar
                   title={story.title}
                   subtitle={<span>by: {story.author}</span>}

@@ -4,10 +4,11 @@ import { FC, ReactElement } from 'react';
 import { Helmet } from 'react-helmet-async';
 // components
 import PageTitle from '../components/PageTitle';
-import { useGetChapterByUuidQuery, useGetStoryByUuidQuery } from '../services/imageApi';
+import useQuery from '../hooks/useQuery';
+import { useGetChapterByUuidQuery } from '../services/chaptersApi';
+import { useGetStoryByUuidQuery } from '../services/storiesApi';
 // constants
 import { APP_TITLE, PAGE_TITLE_STORIES } from '../utils/constants';
-import useQuery from '../utils/useQuery';
 
 // define css-in-js
 const useStyles = makeStyles((theme) => ({
@@ -35,19 +36,27 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function useGetPages(type: any, uuid: any) {
-  const { data: story } = useGetStoryByUuidQuery(uuid, {
-    skip: type !== 'story',
-  });
+  const { data: story } = useGetStoryByUuidQuery(
+    { uuid, populate: ['pages'] },
+    {
+      skip: type !== 'story',
+    },
+  );
 
-  const { data: chapter } = useGetChapterByUuidQuery(uuid, {
-    skip: type !== 'chapter',
-  });
+  const { data: chapter } = useGetChapterByUuidQuery(
+    { uuid },
+    {
+      skip: type !== 'chapter',
+    },
+  );
 
   let pages;
   if (type === 'story') {
-    pages = story?.pages;
+    pages =
+      story?.chapters?.map((chapter: any) => chapter?.pages?.map((page: any) => page))?.flat() ||
+      [];
   } else if (type === 'chapter') {
-    pages = chapter?.pages;
+    pages = chapter?.pages || [];
   }
 
   return pages;
@@ -58,6 +67,7 @@ const Reader: FC<{}> = (): ReactElement => {
   const query = useQuery();
   const pages = useGetPages(query.get('type'), query.get('uuid'));
 
+  console.log(pages);
   return (
     <>
       <Helmet>
@@ -73,9 +83,10 @@ const Reader: FC<{}> = (): ReactElement => {
               <>
                 {pages?.map((page: any) => (
                   <img
-                    src={`http://localhost:3000/image/pages/${page.uuid}/download/${page.number}.png`}
+                    src={page.fileUrl}
                     alt={page.number}
                     className={classes.img}
+                    loading="lazy"
                   />
                 ))}
               </>

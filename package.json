@@ -6,6 +6,7 @@
     "@material-ui/core": "^4.12.3",
     "@material-ui/icons": "^4.11.2",
     "@reduxjs/toolkit": "^1.6.1",
+    "@supercharge/promise-pool": "^1.7.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
@@ -17,6 +18,8 @@
     "@types/react-router-dom": "^5.1.8",
     "formik": "^2.2.9",
     "ky": "^0.28.5",
+    "lodash": "^4.17.21",
+    "qs": "^6.10.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.3.4",
@@ -26,6 +29,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "react-select": "^4.3.1",
+    "react-window": "^1.8.6",
     "typescript": "^4.3.5",
     "web-vitals": "^1.1.2",
     "yup": "^0.32.9"
@@ -55,6 +59,8 @@
     ]
   },
   "devDependencies": {
-    "@types/react-select": "^4.0.17"
+    "@types/qs": "^6.9.7",
+    "@types/react-select": "^4.0.17",
+    "@types/react-window": "^1.8.5"
   }
 }

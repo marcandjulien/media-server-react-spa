@@ -18,6 +18,8 @@ import Reader from '../pages/Reader';
 import Settings from '../pages/Settings';
 import Stories from '../pages/Stories';
 import Story from '../pages/Story';
+import StoryPages from '../pages/StoryPages';
+import UploadChapter from '../pages/UploadChapter';
 // components
 
 // define app routes
@@ -42,6 +44,16 @@ export const routes: Array<RouteItem> = [
     hidden: true,
   },
   {
+    key: 'router-storypages',
+    title: 'StoryPages',
+    tooltip: 'StoryPages',
+    path: '/storypages/:storyUuid',
+    enabled: true,
+    component: StoryPages,
+    icon: HomeIcon,
+    hidden: true,
+  },
+  {
     key: 'router-reader',
     title: 'Reader',
     tooltip: 'Reader',
@@ -58,6 +70,17 @@ export const routes: Array<RouteItem> = [
     path: '/story/:storyUuid',
     enabled: true,
     component: Story,
+    icon: HomeIcon,
+    appendDivider: true,
+    hidden: true,
+  },
+  {
+    key: 'router-story-chapter',
+    title: 'Upload a chapter',
+    tooltip: 'Upload a chapter',
+    path: '/story/:storyUuid/newchapter',
+    enabled: true,
+    component: UploadChapter,
     icon: HomeIcon,
     appendDivider: true,
     hidden: true,

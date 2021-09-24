@@ -13,7 +13,7 @@ interface PageTitleProps {
 const PageSectionTitle = ({ title }: PageTitleProps) => {
   const classes = useStyles();
   return (
-    <Typography variant="h3" className={classes.title} color="textSecondary">
+    <Typography variant="h5" className={classes.title} color="textSecondary">
       {title}
     </Typography>
   );

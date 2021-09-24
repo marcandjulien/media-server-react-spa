@@ -16,7 +16,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import DefaultIcon from '@material-ui/icons/FileCopy';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 // app routes
 import { routes } from '../config';
@@ -53,15 +53,16 @@ const Menu = () => {
     setOpen(!open);
   };
 
+  // I should check if I can simplify the code below.
   return (
     <List>
       {routes
         .filter((route: RouteItem) => !route.hidden)
-        .map((route: RouteItem) => (
-          <>
+        .map((route: RouteItem, index: number) => (
+          <Fragment key={index}>
             {route.subRoutes ? (
               <>
-                <ListItem button onClick={handleClick}>
+                <ListItem key={route.key} button onClick={handleClick}>
                   <ListItemIcon>
                     <IconButton
                       className={clsx({
@@ -81,7 +82,7 @@ const Menu = () => {
                     {open ? <ExpandLess /> : <ExpandMore />}
                   </Tooltip>
                 </ListItem>
-                <Collapse in={open} timeout="auto" unmountOnExit>
+                <Collapse key={`collapse-${index}`} in={open} timeout="auto" unmountOnExit>
                   <List className={classes.nested}>
                     {route.subRoutes.map((sRoute: RouteItem) => (
                       <MenuItem key={`${sRoute.key}`} route={sRoute} />
@@ -92,8 +93,10 @@ const Menu = () => {
             ) : (
               <MenuItem key={route.key} route={route} />
             )}
-            {route.appendDivider && <Divider className={classes.divider} />}
-          </>
+            {route.appendDivider && (
+              <Divider key={`divider-${index}`} className={classes.divider} />
+            )}
+          </Fragment>
         ))}
     </List>
   );

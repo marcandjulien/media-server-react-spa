@@ -1,19 +1,18 @@
 import { Box, Container, Theme, Typography } from '@material-ui/core';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
-import PromisePool from '@supercharge/promise-pool/dist';
 import { Form, Formik } from 'formik';
 import { FC, ReactElement, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useParams } from 'react-router-dom';
 // components
 import Dropzone from '../components/Dropzone';
 import { LinearProgressWithStatus } from '../components/LinearProgressWithStatus';
 import PageTitle from '../components/PageTitle';
-import Chapter from '../model/Chapter.model';
-import { createChapter, createStory } from '../services/upload';
+import { createChapter } from '../services/upload';
 // constants
 import { APP_TITLE, PAGE_TITLE_DASHBOARD } from '../utils/constants';
-import { FileWithPath, parseStoryFolder } from '../utils/path-parser';
+import { FileWithPath, parseChapterFolder } from '../utils/path-parser';
 
 // define css-in-js
 const useStyles = makeStyles((theme: Theme) =>
@@ -32,51 +31,38 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const initialValues = {
   title: '',
-  type: 'Manhwa',
+  number: '',
   pages: [],
-  chapters: [],
-  books: [],
 };
 
-const Dashboard: FC<{}> = (): ReactElement => {
+const UploadChapter: FC<{}> = (): ReactElement => {
   const classes = useStyles();
 
-  const [progress, setProgress] = useState<Map<string, { progress: number; total: number }>>(
-    new Map(),
-  );
+  const { storyUuid } = useParams<{ storyUuid: string }>();
+  const [progress, setProgress] = useState<{ progress: number; total: number }>({
+    progress: 0,
+    total: 0,
+  });
 
-  const updateProgress = (success: boolean, key: string) => {
-    if (success && progress.has(key)) {
-      const currentProgress = progress.get(key);
-      const newProgress = {
-        total: currentProgress!.total,
-        progress: currentProgress!.progress + 1,
-      };
-      setProgress(new Map(progress.set(key, newProgress)));
+  const updateProgress = (success: boolean) => {
+    if (success) {
+      setProgress({ total: progress.total, progress: progress.progress + 1 });
     }
   };
 
   const handleSubmit = async (values: any, formikBag: any) => {
-    const storyUuid = await createStory(values.title, values.type);
-    await PromisePool.for<Chapter>(values.chapters)
-      .withConcurrency(5)
-      .process(async (chapter) => {
-        await createChapter(storyUuid, chapter, updateProgress);
-      });
+    await createChapter(storyUuid, values, updateProgress);
   };
 
   const handleFilesDrop = (
     files: FileWithPath[],
     setFieldValue: (field: string, value: any, shouldValidate?: boolean | undefined) => void,
   ) => {
-    const { chapters, title } = parseStoryFolder(files);
-    setProgress(
-      new Map(
-        chapters.map(({ title, pages }: any) => [title, { total: pages.length + 1, progress: 0 }]),
-      ),
-    );
+    const { title, number, pages } = parseChapterFolder(files);
+    setProgress({ total: pages.length + 1, progress: 0 });
     setFieldValue('title', title);
-    setFieldValue('chapters', chapters);
+    setFieldValue('number', number);
+    setFieldValue('pages', pages);
   };
 
   return (
@@ -106,6 +92,16 @@ const Dashboard: FC<{}> = (): ReactElement => {
                   error={touched.title && Boolean(errors.title)}
                   helperText={touched.title && errors.title}
                 />
+                <TextField
+                  fullWidth
+                  id="number"
+                  name="number"
+                  label="number"
+                  value={values.number}
+                  onChange={handleChange}
+                  error={touched.number && Boolean(errors.number)}
+                  helperText={touched.number && errors.number}
+                />
                 {/* <Field name="type" component={SelectField} options={options} /> */}
                 <Dropzone onChange={(files: any) => handleFilesDrop(files, setFieldValue)} />
                 <button type="submit">Submit</button>
@@ -114,14 +110,12 @@ const Dashboard: FC<{}> = (): ReactElement => {
           </Formik>
           <Box className={classes.tasklist}>
             <Typography variant="h5">Tasks</Typography>
-            {Array.from(progress).map(([title, { total, progress }]: any) => (
-              <Box sx={{ width: '100%' }}>
-                <Box sx={{ minWidth: 35 }}>
-                  <Typography variant="body2">{`${title} - ${total - 1} pages`}</Typography>
-                </Box>
-                <LinearProgressWithStatus value={(progress / total) * 100} />
+            <Box sx={{ width: '100%' }}>
+              <Box sx={{ minWidth: 35 }}>
+                <Typography variant="body2">{`${progress.total - 1} pages`}</Typography>
               </Box>
-            ))}
+              <LinearProgressWithStatus value={(progress.progress / progress.total) * 100} />
+            </Box>
           </Box>
         </Container>
       </div>
@@ -129,4 +123,4 @@ const Dashboard: FC<{}> = (): ReactElement => {
   );
 };
 
-export default Dashboard;
+export default UploadChapter;

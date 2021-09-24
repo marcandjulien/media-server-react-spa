@@ -7,8 +7,7 @@ import { Link, useParams } from 'react-router-dom';
 import PageImageList from '../components/PageImageList';
 // components
 import PageTitle from '../components/PageTitle';
-import { useDeleteChapterByUuidMutation, useGetChapterByUuidQuery } from '../services/chaptersApi';
-import { usePatchPageByUuidMutation } from '../services/pagesApi';
+import { useGetStoryByUuidQuery } from '../services/storiesApi';
 // constants
 import { APP_TITLE, PAGE_TITLE_CHAPTER } from '../utils/constants';
 
@@ -32,21 +31,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Chapter: FC<{}> = (): ReactElement => {
+const StoryPages: FC<{}> = (): ReactElement => {
   const classes = useStyles();
 
-  const { chapterUuid } = useParams<{ chapterUuid: string }>();
-  const [filter, setFilter] = useState<any>(undefined);
-  const { data: chapter, refetch } = useGetChapterByUuidQuery({
-    uuid: chapterUuid,
-    filter,
+  const [tag, setTag] = useState<string>('');
+  const [searchTag, setSearchTag] = useState<string>('');
+  const { storyUuid } = useParams<{ storyUuid: string }>();
+  const { data: story, refetch } = useGetStoryByUuidQuery({
+    uuid: storyUuid,
+    populate: ['pages'],
+    filter: searchTag
+      ? {
+          pagesTags: {
+            $in: searchTag,
+          },
+        }
+      : undefined,
   });
-  const [updatePage] = usePatchPageByUuidMutation();
 
-  const [deleteChapter] = useDeleteChapterByUuidMutation();
+  const [updatePage] = usePatchPageMutation();
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [tag, setTag] = useState<string>('');
 
   const handleAddTag = async () => {
     const promises = Array.from(selected).map((uuid) =>
@@ -57,8 +62,11 @@ const Chapter: FC<{}> = (): ReactElement => {
   };
 
   const handleFilterTag = () => {
-    setFilter(tag ? { pagesTags: tag } : undefined);
+    setSearchTag(tag);
   };
+
+  const filesUrl =
+    story?.chapters?.map((chapter: any) => chapter?.pages?.map((page: any) => page))?.flat() || [];
 
   return (
     <>
@@ -68,10 +76,9 @@ const Chapter: FC<{}> = (): ReactElement => {
         </title>
       </Helmet>
       <div className={classes.root}>
-        <PageTitle title={`${PAGE_TITLE_CHAPTER} ${chapter?.number}`} />
-        <span>Find a way to update a chapter.</span>
-        <Link to={`/story/${chapter?.story.uuid}`}>Go to story</Link>
-        <Link to={`/reader?type=chapter&uuid=${chapterUuid}`}>Read Chapter</Link>
+        <PageTitle title={story?.title} />
+        <Link to={`/story/${story?.uuid}`}>Go to story</Link>
+        <Link to={`/reader?type=story&uuid=${story?.uuid}`}>Read Chapter</Link>
         <div>
           <TextField
             id="standard-basic"
@@ -83,17 +90,17 @@ const Chapter: FC<{}> = (): ReactElement => {
             Update tag
           </Button>
           <Button variant="contained" onClick={handleFilterTag}>
-            Filter
-          </Button>
-          <Button variant="contained" onClick={() => deleteChapter(chapter.uuid)}>
-            Delete Chapter
+            Update tag
           </Button>
         </div>
 
-        <PageImageList pages={chapter?.pages} setSelected={setSelected} />
+        <PageImageList pages={filesUrl} setSelected={setSelected} />
       </div>
     </>
   );
 };
 
-export default Chapter;
+export default StoryPages;
+function usePatchPageMutation(): [any] {
+  throw new Error('Function not implemented.');
+}
